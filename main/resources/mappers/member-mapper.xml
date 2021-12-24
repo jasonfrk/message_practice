@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">	<!-- mybatis mapper파일임을 명시 -->
+	
+<!-- mapper파일에 대한 이름 값을 지정. 쿼리문의 이름과 조합하기 위함 -->
+<mapper namespace="memberMapper">
+	<!-- 모든 쿼리는 mapper 태그 안쪽에서 작성 -->
+	<!-- select, insert, update, delete -->
+	
+	<!-- id로 회원정보 가져오기 -->
+	<select id="getMember" resultType="MemberDTO">
+		select * from member where id = #{id}
+	</select>
+	
+	<!-- 나 빼고 모든 회원 닉네임 가져오기 -->
+	<select id="getNicknames" resultType="String">
+		select nickname from member where nickname != #{nickname}
+	</select>
+	
+	<!-- 로그인 확인 후 MemberDTO 반환. parameterTpye이 map일 때, 키 값을 입력하면 알아서 밸류값을 받아준다. -->
+	<select id="isLoginOk" parameterType="map" resultType="MemberDTO">
+		select * from member where id = #{id} and pw = #{pw}
+	</select>
+	 <!--  <resultMap id="testMap" type="kh.com.message.dto.MemDTO">
+	 	<result column="id" property="email"/>
+	 	<result column="pw" property="password"/>
+	 	<result column="nickname" property="alias"/>
+	 </resultMap>
+	 <select id="isLoginOk" parameterType="map" resultMap="testMap">
+	 	select * from member where id = #{id} and pw = #{pw}
+	 </select> -->
+	
+	
+	<!-- 아이디 중복 확인. (반환받을 때는 parameterType이 아닌 resultType을 입력). 1이면 true, 0이면 false -->
+	<select id="checkId" resultType="boolean">
+		select count(*) from member where id = #{id}
+	</select>
+	
+	<!-- 새로운 멤버 추가 -->
+	<insert id="insertMember" parameterType="kh.com.message.dto.MemberDTO">
+		insert into member values(#{id}, #{pw}, #{nickname})
+	</insert>
+	
+	<!-- 정보 수정 -->
+	<!-- 1. 비밀번호만 수정하는 경우
+		 2. 닉네임만 수정하는 경우
+		 3. 비밀번호와 닉네임 모두 수정하는 경우  
+	 -->
+	 <update id="updateInfo" parameterType="MemberDTO">
+	 	update member
+	 	
+	 	<trim prefix="set" suffixOverrides=",">
+	 		<!-- 비밀번호만 수정하는 경우 -->
+		 	<if test="pw != null and pw != ''">
+		 		pw = #{pw}, 
+		 	</if>
+		 	<!-- 닉네임만 수정하는 경우 -->
+		 	<if test="nickname != null and nickname != ''">
+		 		nickname = #{nickname}
+		 	</if>
+	 	</trim>
+	 	
+	 	where id = #{id}
+	 	
+	 </update>
+	 <!-- trim
+	 	prefix: 접두사(trim태그 안쪽에 있는 문자열들의 가장 맨 앞에 속성값으로 준 값을 붙이겠다)
+	 	prefixOverrides: 접두사에 속성값으로 준 값이 존재한다면 그 값을 지워주겠다. true로 묶인 문장의 맨 앞.
+	 	suffix: 접미사(trim태그 안쪽에 있는 문자열들의 가장 뒤 쪽에 속성값으로 준 값을 붙이겠다)
+	 	suffixOverrides: 접미사에 속성값으로 준 값이 존재한다면 그 값을 지워주겠다. true로 묶인 문장의 맨 끝.
+	 -->
+	 
+</mapper>

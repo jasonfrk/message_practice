@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">	<!-- mybatis mapper파일임을 명시 -->
+	
+<!-- mapper파일에 대한 이름 값 지정. 쿼리문의 이름과 조합하기 위함 -->
+<mapper namespace="messageMapper">
+<!-- insert, update, delete는 resultType이 default로 int이다. -->
+<!-- 기본자료형은 parameterType 입력해줄 필요 없다.(int, long, String,...) -->
+
+	<!-- 조건에 맞는 쪽지 불러오기 -->
+	<!--
+		1. nickname이 있는 경우
+		2. content가 있는 경우
+		3. written_date가 있는 경우
+		4. 전체가 있는 경우 (nickname, content, written_date)
+	-->
+	<select id="search" parameterType="map" resultType="MessageDTO">
+		select * from message
+		
+		<trim prefix="where" suffix="AND" suffixOverrides="and">
+			<!-- 닉네임이 체크 된 경우 -->
+			<if test="from_nickname != null">
+				from_nickname like '%'||#{from_nickname}||'%' and
+			</if>
+			
+			<!-- 내용이 체크 된 경우 -->
+			<if test="content != null">
+				content like '%'||#{content}||'%' and
+			</if>
+			
+			<!-- 날짜가 체크 된 경우 -->
+			<if test="written_date != null">
+				written_date like '%'||#{written_date}||'%' and
+			</if>
+			
+			<!-- 전체가 체크 된 경우 -->
+			<if test="total != null">
+				(from_nickname like '%'||#{total}||'%' or
+				 content like '%'||#{total}||'%' or
+				 written_date like '%'||#{total}||'%') and
+			</if>
+		</trim> 
+		to_nickname = #{to_nickname}
+	</select>
+
+
+	<!-- 쪽지 삭제 -->
+	<delete id="deleteMsg" parameterType="map">
+		delete from message where seq_msg in
+		<foreach collection="array" item="seqArr" open="(" close=")" separator=",">
+			#{seqArr}
+		</foreach>
+		<!-- foreach
+			collection
+			- map으로 배열이나 리스트를 받아올 경우 해당 값이 든 map의 key값을 적음
+			- 만약에 배열 그대로 넘어올 경우 mybatis가 "array"(default)라는 key값으로 배열을 맵에 저장해서 받음
+			item -> 해당 배열을 어떤 변수명으로 사용할지
+		 -->
+	</delete>
+	
+	<!-- 메세지 불러오기 -->
+	<select id="getMessage" resultType="MessageDTO">
+		select * from message where to_nickname = #{nickname}
+	</select>
+
+	<!-- 새로운 쪽지 저장 -->
+	<insert id="insertMsg" parameterType="map">
+		insert into message values
+		(seq_msg.nextval, #{to_nickname}, #{from_nickname}, #{content}, sysdate)
+	</insert>
+</mapper>	

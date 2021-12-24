@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+	PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+	"http://mybatis.org//dtd/mybatis-3-config.dtd"><!-- mybatis 설정 파일임을 명시 -->
+
+<!-- 이 안에서 DB와 관련된 설정 -->
+<configuration>
+	<settings>
+		<setting name="jdbcTypeForNull" value="NULL"></setting>
+	</settings>
+	<typeAliases>
+		<typeAlias type="kh.com.message.dto.MemberDTO" alias="MemberDTO" />
+		<typeAlias type="kh.com.message.dto.MessageDTO" alias="MessageDTO" />
+	</typeAliases>
+
+	<environments default="development">
+		<environment id="development">
+			<transactionManager type="JDBC"/>
+			<dataSource type="POOLED"> <!-- 커넥션 풀을 사용하겠다. -->
+				<property name="driver" value="oracle.jdbc.driver.OracleDriver"/>
+				<property name="url" value="jdbc:oracle:thin:@localhost:1521:xe"/>
+				<property name="username" value="msg_manager"/>
+				<property name="password" value="manager"/>
+			</dataSource>
+		</environment>
+	</environments>
+	
+	<mappers>
+		<mapper resource="mappers/member-mapper.xml"/>
+		<mapper resource="mappers/message-mapper.xml"/>
+	</mappers>
+</configuration>
